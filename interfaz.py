@@ -5,7 +5,14 @@ Menu de consola y flujo principal de la aplicacion.
 from datos import DESTINO_CASO_BASE, ESTABLECIMIENTOS
 from dijkstra import calcular_ruta
 from grafo import crear_grafo, reglas_desde_configuracion, validar_ubicacion
-from utils import copiar_configuracion, formatear_ruta, leer_entero, leer_texto, pausar
+from utils import (
+    copiar_configuracion,
+    formatear_ruta,
+    leer_entero,
+    leer_texto,
+    normalizar_destino,
+    pausar,
+)
 from visualizacion import dibujar_grafo_y_rutas
 
 
@@ -79,6 +86,7 @@ def calcular_rutas_pareja(grafo, ubicacion_javier, ubicacion_andreina, destino):
 
 def ejecutar_analisis(configuracion, destino_info):
     """Construye el grafo, calcula rutas y muestra el resultado."""
+    destino_info = normalizar_destino(destino_info)
     validar_ubicacion(destino_info, configuracion, destino_info["nombre"])
     validar_ubicacion(configuracion["javier"], configuracion, "Javier")
     validar_ubicacion(configuracion["andreina"], configuracion, "Andreina")
@@ -314,7 +322,7 @@ def configuracion_avanzada(configuracion):
                 print("  3. Ingresar destino manual")
                 sub = leer_entero("Opcion", 1)
                 if sub == 1:
-                    destino_pendiente = dict(DESTINO_CASO_BASE)
+                    destino_pendiente = normalizar_destino(dict(DESTINO_CASO_BASE))
                 elif sub == 2:
                     destino_pendiente = seleccionar_establecimiento()
                 else:
@@ -331,7 +339,7 @@ def configuracion_avanzada(configuracion):
 def ejecutar_caso_base():
     """Ejecuta el caso base del enunciado sin preguntas adicionales."""
     configuracion = copiar_configuracion()
-    destino = dict(DESTINO_CASO_BASE)
+    destino = normalizar_destino(dict(DESTINO_CASO_BASE))
     print("\nUsando caso base del enunciado...")
     print(
         f"Destino: {destino['nombre']} "
