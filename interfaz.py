@@ -3,7 +3,7 @@ Menu de consola y flujo principal de la aplicacion.
 """
 
 from datos import DESTINO_CASO_BASE, ESTABLECIMIENTOS
-from dijkstra import calcular_ruta
+from dijkstra import calcular_rutas_pareja
 from grafo import crear_grafo, reglas_desde_configuracion, validar_ubicacion
 from utils import (
     copiar_configuracion,
@@ -41,6 +41,13 @@ def mostrar_resultado(resultado, destino_info):
     else:
         print("Tiempo total: No se encontro ruta")
 
+    if resultado.get("mensaje_restriccion"):
+        print("\nRestriccion de privacidad:")
+        print(resultado["mensaje_restriccion"])
+
+    if resultado.get("advertencia_final"):
+        print(resultado["advertencia_final"])
+
     print("\nSincronizacion:")
     if resultado["quien_sale_antes"] is None:
         print("No se pudo determinar la sincronizacion (ruta no encontrada).")
@@ -48,40 +55,14 @@ def mostrar_resultado(resultado, destino_info):
         print("Ambos pueden salir al mismo tiempo.")
     else:
         otro = "Andreina" if resultado["quien_sale_antes"] == "Javier" else "Javier"
+        minutos = resultado["minutos_antes"]
+        unidad = "minuto" if minutos == 1 else "minutos"
         print(
-            f"{resultado['quien_sale_antes']} debe salir {resultado['minutos_antes']} "
-            f"minutos antes que {otro}."
+            f"{resultado['quien_sale_antes']} debe salir {minutos} "
+            f"{unidad} antes que {otro}."
         )
 
     print("=" * 41 + "\n")
-
-
-def calcular_rutas_pareja(grafo, ubicacion_javier, ubicacion_andreina, destino):
-    """Calcula rutas y tiempos para Javier y Andreina, y determina la sincronizacion."""
-    tiempo_javier, camino_javier = calcular_ruta(grafo, ubicacion_javier, destino)
-    tiempo_andreina, camino_andreina = calcular_ruta(grafo, ubicacion_andreina, destino)
-
-    if tiempo_javier is None or tiempo_andreina is None:
-        quien_sale_antes = None
-        minutos_antes = None
-    elif tiempo_javier > tiempo_andreina:
-        quien_sale_antes = "Javier"
-        minutos_antes = tiempo_javier - tiempo_andreina
-    elif tiempo_andreina > tiempo_javier:
-        quien_sale_antes = "Andreina"
-        minutos_antes = tiempo_andreina - tiempo_javier
-    else:
-        quien_sale_antes = "Ambos"
-        minutos_antes = 0
-
-    return {
-        "camino_javier": camino_javier,
-        "tiempo_javier": tiempo_javier,
-        "camino_andreina": camino_andreina,
-        "tiempo_andreina": tiempo_andreina,
-        "quien_sale_antes": quien_sale_antes,
-        "minutos_antes": minutos_antes,
-    }
 
 
 def ejecutar_analisis(configuracion, destino_info):
